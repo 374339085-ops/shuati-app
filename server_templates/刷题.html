@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>刷题软件</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:#1a1a2e;color:#eee;min-height:100vh}
+.container{max-width:600px;margin:0 auto;padding:12px}
+.card{background:#16213e;border-radius:8px;padding:14px;margin-bottom:10px}
+.btn{padding:10px 20px;border:none;border-radius:6px;font-size:15px;cursor:pointer;font-weight:bold;display:inline-block}
+.btn-primary{background:#e94560;color:#fff}
+.btn-green{background:#4ecca3;color:#1a1a2e}
+.btn-small{padding:6px 12px;font-size:13px}
+.input{width:100%;padding:10px 12px;background:#0f3460;border:1px solid #0f3460;border-radius:6px;color:#eee;font-size:15px;margin-bottom:8px}
+.input:focus{outline:none;border-color:#e94560}
+.label{color:#888;font-size:13px;margin-bottom:4px;display:block}
+.title{font-size:20px;font-weight:bold;margin-bottom:10px}
+.hidden{display:none!important}
+.nav{display:flex;gap:6px;overflow-x:auto;padding:8px 0;margin-bottom:10px}
+.nav .btn{white-space:nowrap;font-size:13px;padding:7px 12px;background:#0f3460;color:#aaa}
+.nav .btn.active{background:#e94560;color:#fff}
+.progress{background:#0f3460;height:6px;border-radius:3px;margin:8px 0}
+.progress-bar{background:#e94560;height:6px;border-radius:3px}
+.option{border:1px solid #0f3460;padding:10px 12px;border-radius:6px;margin-bottom:6px;cursor:pointer;font-size:15px}
+.option:hover{background:#0f3460}
+.option.selected{border-color:#e94560;background:#2a1a3e}
+.option.correct{border-color:#4ecca3;background:#1a3a2e}
+.option.wrong{border-color:#e94560;background:#3a1a2e}
+.badge{display:inline-block;background:#0f3460;color:#aaa;padding:2px 8px;border-radius:4px;font-size:12px}
+.mt-4{margin-top:10px}
+.mb-4{margin-bottom:10px}
+.text-center{text-align:center}
+.text-danger{color:#e94560}
+.text-success{color:#4ecca3}
+.text-muted{color:#888}
+.flex{display:flex;gap:8px;flex-wrap:wrap}
+.bank-item{background:#0f3460;border-radius:6px;padding:10px;margin-bottom:6px}
+.bank-item .bank-name{font-size:15px;font-weight:bold}
+.bank-item .bank-info{font-size:12px;color:#888;margin-top:2px}
+</style>
+</head>
+<body>
+<div class="container" id="app">
+  <!-- 登录页 -->
+  <div id="page-login">
+    <div class="text-center" style="padding:40px 0 10px">
+      <div style="font-size:48px">&#x1F95F;</div>
+      <div style="font-size:22px;font-weight:bold;color:#e94560">刷题软件</div>
+    </div>
+    <div class="card">
+      <label class="label" style="margin-top:4px">角色</label>
+      <div class="flex mb-4">
+        <button class="btn btn-small" id="role-teacher" onclick="setRole('teacher')" style="background:#e94560;color:#fff">&#x1F468;&#x200D;&#x1F3EB; 老师</button>
+        <button class="btn btn-small" id="role-student" onclick="setRole('student')" style="background:#0f3460;color:#aaa">&#x1F393; 学员</button>
+      </div>
+      <label class="label">手机号</label>
+      <input class="input" id="login-phone" type="tel" placeholder="请输入手机号">
+      <label class="label">密码</label>
+      <input class="input" id="login-pwd" type="password" placeholder="至少6位密码">
+      <div id="login-msg" class="text-danger" style="font-size:13px;margin-bottom:6px"></div>
+      <button class="btn btn-primary" onclick="doLogin()" style="width:100%">登 录</button>
+      <div class="text-center mt-4">
+        <span class="text-muted">还没有账号？</span>
+        <span style="color:#4ecca3;cursor:pointer" onclick="showPage('register')">注 册</span>
+      </div>
+    </div>
+  </div>
+  <!-- 注册页 -->
+  <div id="page-register" class="hidden">
+    <div class="text-center" style="padding:30px 0 10px">
+      <div style="font-size:20px;font-weight:bold;color:#e94560">注册新账号</div>
+    </div>
+    <div class="card">
+      <label class="label">手机号</label>
+      <input class="input" id="reg-phone" type="tel" placeholder="11位手机号">
+      <label class="label">密码（至少6位）</label>
+      <input class="input" id="reg-pwd" type="password" placeholder="设置密码">
+      <label class="label">确认密码</label>
+      <input class="input" id="reg-pwd2" type="password" placeholder="再次输入密码">
+      <div id="reg-msg" class="text-danger" style="font-size:13px;margin-bottom:6px"></div>
+      <button class="btn btn-green" onclick="doRegister()" style="width:100%">注 册</button>
+      <div class="text-center mt-4">
+        <span style="color:#888;cursor:pointer" onclick="showPage('login')">&larr; 返回登录</span>
+      </div>
+    </div>
+  </div>
+  <!-- 首页 -->
+  <div id="page-home" class="hidden">
+    <div class="flex" style="justify-content:space-between;align-items:center;padding:8px 0">
+      <span class="title" id="home-title">欢迎回来</span>
+      <button class="btn btn-small" style="background:#0f3460;color:#e94560" onclick="doLogout()">退出</button>
+    </div>
+    <div id="home-content"></div>
+  </div>
+  <!-- 班级页 -->
+  <div id="page-class" class="hidden">
+    <div class="flex" style="justify-content:space-between;align-items:center;padding:8px 0">
+      <span class="title" id="class-title">&#x1F3EB; 班级</span>
+      <button class="btn btn-small" style="background:#0f3460;color:#aaa" onclick="showPage('home')">&larr; 返回</button>
+    </div>
+    <div id="class-content"></div>
+  </div>
+  <!-- 练习页 -->
+  <div id="page-practice" class="hidden">
+    <div class="flex" style="justify-content:space-between;align-items:center;padding:8px 0">
+      <button class="btn btn-small" style="background:#0f3460;color:#aaa" onclick="exitPractice()">&larr; 退出</button>
+      <span id="practice-progress" style="color:#888;font-size:14px">0/0</span>
+    </div>
+    <div id="practice-content"></div>
+  </div>
+  <!-- 错题本 -->
+  <div id="page-wrong" class="hidden">
+    <div class="flex" style="justify-content:space-between;align-items:center;padding:8px 0">
+      <span class="title">&#x1F4DD; 错题本</span>
+      <button class="btn btn-small" style="background:#0f3460;color:#aaa" onclick="showPage('home')">&larr; 返回</button>
+    </div>
+    <div id="wrong-content"></div>
+  </div>
+  <!-- 统计 -->
+  <div id="page-stats" class="hidden">
+    <div class="flex" style="justify-content:space-between;align-items:center;padding:8px 0">
+      <span class="title">&#x1F4CA; 统计</span>
+      <button class="btn btn-small" style="background:#0f3460;color:#aaa" onclick="showPage('home')">&larr; 返回</button>
+    </div>
+    <div id="stats-content"></div>
+  </div>
+</div>
+<script>
+var state = {
+  phone: '',
+  role: 'teacher',
+  currentBank: null,
+  queue: [],
+  idx: 0
+};
+var API_BASE = '';
+
+function showPage(name) {
+  ['login','register','home','class','practice','wrong','stats'].forEach(function(p) {
+    var el = document.getElementById('page-'+p);
+    if(el) el.className = 'hidden';
+  });
+  var target = document.getElementById('page-'+name);
+  if(target) target.className = '';
+}
+function setRole(r) {
+  state.role = r;
+  var t = document.getElementById('role-teacher');
+  var s = document.getElementById('role-student');
+  if(r==='teacher') { t.style.background='#e94560'; t.style.color='#fff'; s.style.background='#0f3460'; s.style.color='#aaa'; }
+  else { s.style.background='#e94560'; s.style.color='#fff'; t.style.background='#0f3460'; t.style.color='#aaa'; }
+}
+function api(path, data) {
+  return fetch(API_BASE + '/api' + path, {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify(data)
+  }).then(function(r){return r.json()}).catch(function(e){return {success:false,msg:'网络错误'};});
+}
+function el(id) { return document.getElementById(id); }
+function esc(s) { if(!s) return ''; var d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+
+function doLogin() {
+  var phone = el('login-phone').value.trim();
+  var pwd = el('login-pwd').value;
+  if(!phone||!pwd){el('login-msg').textContent='请输入手机号和密码';return;}
+  api('/login',{phone:phone,password:pwd}).then(function(res){
+    if(res.success){
+      if(res.role!==state.role){el('login-msg').textContent='该账号不是'+(state.role==='teacher'?'老师':'学员')+'角色';return;}
+      state.phone=phone; showPage('home'); loadHome();
+    } else { el('login-msg').textContent=res.msg||'登录失败'; }
+  });
+}
+function doRegister() {
+  var phone=el('reg-phone').value.trim(), pwd=el('reg-pwd').value, pwd2=el('reg-pwd2').value;
+  if(!phone||phone.length!==11){el('reg-msg').textContent='请输入正确11位手机号';return;}
+  if(pwd.length<6){el('reg-msg').textContent='密码至少6位';return;}
+  if(pwd!==pwd2){el('reg-msg').textContent='两次密码不一致';return;}
+  api('/register',{phone:phone,password:pwd,role:state.role}).then(function(res){
+    if(res.success){alert('注册成功，请登录！');showPage('login');}
+    else{el('reg-msg').textContent=res.msg||'注册失败';}
+  });
+}
+function doLogout(){state.phone='';state.queue=[];showPage('login');}
+
+function loadHome(){
+  el('home-title').textContent=(state.role==='teacher'?'\u{1F468}\u{200D}\u{1F3EB} 老师 - ':'\u{1F393} 学员 - ')+'欢迎回来';
+  if(state.role==='teacher') loadTeacherHome(); else loadStudentHome();
+}
+function loadTeacherHome(){
+  var cont=el('home-content'); cont.innerHTML='';
+  var nav=document.createElement('div'); nav.className='nav';
+  ['\u{1F3EB} 班级','\u{270D}\u{FE0F} 练习','\u{1F4DD} 错题本','\u{1F4CA} 统计'].forEach(function(t,i){
+    var b=document.createElement('button'); b.className='btn'; b.textContent=t;
+    b.onclick=function(){if(i===0)showClassTeacher();else if(i===1)showBankSelect();else if(i===2)showWrongNotes();else if(i===3)showStats();};
+    nav.appendChild(b);
+  });
+  cont.appendChild(nav);
+  api('/get_teacher_classes',{teacher:state.phone}).then(function(res){
+    if(res.success&&res.classes){
+      var totalB=0,totalS=0; res.classes.forEach(function(c){totalB+=c.banks.length;totalS+=c.student_count;});
+      var g=document.createElement('div'); g.className='flex'; g.style.marginBottom='10px';
+      [[res.classes.length,'班级'],[totalB,'共享题库'],[totalS,'学员']].forEach(function(v){
+        var c=document.createElement('div'); c.className='card'; c.style.flex='1'; c.style.textAlign='center';
+        c.innerHTML='<div style="font-size:24px;font-weight:bold;color:#e94560">'+v[0]+'</div><div style="font-size:12px;color:#888">'+v[1]+'</div>';
+        cont.appendChild(c);
+      });
+    }
+  });
+  api('/get_teacher_classes',{teacher:state.phone}).then(function(res){
+    if(!res.success)return;
+    if(res.classes.length===0){
+      var d=document.createElement('div'); d.className='card text-center';
+      d.innerHTML='暂无班级，<span style="color:#4ecca3;cursor:pointer" onclick="showClassTeacher()">去创建</span>';
+      cont.appendChild(d); return;
+    }
+    res.classes.forEach(function(cls){
+      var card=document.createElement('div'); card.className='card';
+      var bh='<div><b>\u{1F3EB} '+esc(cls.name)+'</b> <span class="badge">'+cls.student_count+'人</span></div>'+
+        '<div style="font-size:12px;color:#f9c74f">班级码: '+cls.code+'</div>';
+      var code=cls.code;
+      api('/get_bank_questions_for_class',{class_code:code}).then(function(res2){
+        if(res2.success){
+          card.innerHTML+=res2.banks.map(function(b){return '<div class="bank-item" onclick="startPractice(\'class_'+esc(b.name)+'\')">\u{1F4D6} '+esc(b.name)+' ('+b.count+'题)</div>';}).join('');
+          card.innerHTML+='<div class="mt-4"><button class="btn btn-small btn-green" onclick="showClassTeacher()">\u{1F4E4} 管理</button></div>';
+        }
+      });
+      cont.appendChild(card);
+    });
+  });
+}
+function loadStudentHome(){
+  var cont=el('home-content'); cont.innerHTML='<div class="text-center text-muted" style="padding:20px">加载中...</div>';
+  api('/get_student_classes',{student:state.phone}).then(function(res){
+    cont.innerHTML='';
+    if(!res.success||!res.classes||res.classes.length===0){
+      cont.innerHTML='<div class="card text-center" style="padding:40px 20px"><div style="font-size:40px">\u{1F3EB}</div><div style="font-size:16px;margin:8px 0">还没有加入班级</div><button class="btn btn-primary" onclick="showStudentClass()">加入班级</button></div>';
+      return;
+    }
+    var tB=0,tQ=0; res.classes.forEach(function(c){c.banks.forEach(function(b){tB++;tQ+=b.count;});});
+    [['\u{1F3EB}',res.classes.length,'班级'],['\u{1F4DA}',tB,'题库'],['\u{1F4D6}',tQ,'总题数']].forEach(function(v){
+      var c=document.createElement('div'); c.className='card'; c.style.flex='1'; c.style.textAlign='center';
+      c.innerHTML='<div style="font-size:22px;font-weight:bold;color:#e94560">'+v[0]+' '+v[1]+'</div><div style="font-size:11px;color:#888">'+v[2]+'</div>';
+      cont.appendChild(c);
+    });
+    res.classes.forEach(function(cls){
+      var card=document.createElement('div'); card.className='card';
+      card.innerHTML='<div class="bank-name">\u{1F3EB} '+esc(cls.name)+'</div>';
+      if(cls.banks.length===0) card.innerHTML+='<div class="text-muted" style="font-size:13px;padding:4px 0">暂无题库</div>';
+      else cls.banks.forEach(function(b){
+        card.innerHTML+='<div class="bank-item" style="cursor:pointer" onclick="startPractice(\'class_'+esc(b.name)+'\')">\u{1F4D6} '+esc(b.name)+' <span class="badge">'+b.count+'题</span></div>';
+      });
+      cont.appendChild(card);
+    });
+  });
+}
+
+function showClassTeacher(){
+  var cont=el('class-content'); el('class-title').textContent='\u{1F3EB} 班级管理';
+  cont.innerHTML='<div class="card"><div style="margin-bottom:6px;color:#4ecca3;font-weight:bold">创建新班级</div><div class="flex"><input class="input" id="new-class-name" value="新班级" style="margin:0;flex:1"><button class="btn btn-primary" onclick="doCreateClass()">创建</button></div></div>';
+  api('/get_teacher_classes',{teacher:state.phone}).then(function(res){
+    if(!res.success)return;
+    res.classes.forEach(function(c){
+      var card=document.createElement('div'); card.className='card';
+      var h='<div class="flex" style="justify-content:space-between"><b>\u{1F3EB} '+esc(c.name)+'</b> <span class="badge">'+c.student_count+'人</span></div>'+
+        '<div style="font-size:14px;color:#f9c74f;margin:4px 0">加入码: '+c.code+'</div>'+
+        '<div style="font-size:12px;color:#888">题库:</div>';
+      if(c.banks.length===0) h+='<div class="text-muted" style="font-size:13px">暂无上传题库</div>';
+      else c.banks.forEach(function(b){h+='<div class="bank-item" style="padding:6px 8px">\u{1F4D6} '+esc(b.name)+' ('+b.count+'题)</div>';});
+      h+='<div class="mt-4"><button class="btn btn-small btn-green" onclick="uploadBank(\''+c.code+'\')">\u{1F4E4} 上传题库</button></div>';
+      card.innerHTML=h; cont.appendChild(card);
+    });
+  });
+  showPage('class');
+}
+function showStudentClass(){
+  var cont=el('class-content'); el('class-title').textContent='\u{1F3EB} 加入班级';
+  cont.innerHTML='<div class="card"><div style="margin-bottom:6px;color:#4ecca3;font-weight:bold">输入班级加入码</div>'+
+    '<div class="flex"><input class="input" id="join-code" placeholder="6位加入码" style="text-align:center;font-size:18px;width:120px;margin:0">'+
+    '<button class="btn btn-primary" onclick="doJoinClass()">加入</button></div><div id="join-msg" class="text-danger" style="font-size:13px;margin-top:6px"></div></div>';
+  api('/get_student_classes',{student:state.phone}).then(function(res){
+    if(!res.success)return;
+    res.classes.forEach(function(cls){
+      var card=document.createElement('div'); card.className='card';
+      card.innerHTML='<div class="bank-name">\u{1F3EB} '+esc(cls.name)+'</div>';
+      cls.banks.forEach(function(b){
+        card.innerHTML+='<div class="bank-item" style="cursor:pointer" onclick="startPractice(\'class_'+esc(b.name)+'\')">\u{1F4D6} '+esc(b.name)+' ('+b.count+'题)</div>';
+      });
+      cont.appendChild(card);
+    });
+  });
+  showPage('class');
+}
+function doCreateClass(){
+  var name=el('new-class-name').value.trim()||'新班级';
+  api('/create_class',{teacher:state.phone,name:name}).then(function(res){
+    if(res.success){alert('班级创建成功！\n加入码: '+res.code+'\n\n把加入码发给学员即可加入');showClassTeacher();}
+    else alert(res.msg||'创建失败');
+  });
+}
+function doJoinClass(){
+  var code=el('join-code').value.trim();
+  if(!code){el('join-msg').textContent='请输入加入码';return;}
+  api('/join_class',{student:state.phone,code:code}).then(function(res){
+    if(res.success){el('join-msg').textContent='\u2705 已加入！';el('join-msg').className='text-success';setTimeout(function(){showStudentClass();},800);}
+    else{el('join-msg').textContent=res.msg||'加入失败';}
+  });
+}
+function uploadBank(classCode){
+  var name=prompt('请输入要上传的题库名称（如: 提升运输试题）：'); if(!name)return;
+  api('/upload_bank',{teacher:state.phone,bank_name:name,class_code:classCode}).then(function(res){
+    if(res.success)alert('上传成功！'); else alert(res.msg||'上传失败');
+    showClassTeacher();
+  });
+}
+
+function showBankSelect(){
+  showPage('home');
+  var cont=el('home-content');
+  cont.innerHTML='<div class="card text-center" style="padding:20px">加载题库...</div>';
+  state.queue=[]; state.idx=0;
+  startPracticeMode();
+}
+function startPracticeMode(){
+  var cont=el('home-content');
+  cont.innerHTML='<div class="card text-center" style="padding:20px">加载中...</div>';
+  var bankName=state.currentBank;
+  var questions=[];
+  if(bankName&&bankName.startsWith('class_')){
+    api('/get_bank_questions',{bank_name:bankName.replace('class_','')}).then(function(res){
+      if(res.success) questions=res.questions||[];
+      startPracticeWithQs(questions);
+    });
+  } else startPracticeWithQs([]);
+}
+function startPracticeWithQs(questions){
+  var queue=questions.slice();
+  if(queue.length===0){el('home-content').innerHTML='<div class="card text-center" style="padding:40px">暂无题目</div>';return;}
+  state.queue=queue; state.idx=0;
+  showPracticeQuestion();
+}
+
+function showPracticeQuestion(){
+  if(state.idx>=state.queue.length){showPracticeComplete();return;}
+  showPage('practice');
+  var q=state.queue[state.idx];
+  el('practice-progress').textContent=(state.idx+1)+'/'+state.queue.length;
+  var cont=el('practice-content');
+  var types={single:'单选题',multiple:'多选题',judge:'判断题',fill:'填空题',essay:'问答题'};
+  var idx=state.idx;
+  var h='<div class="card"><div class="badge">'+(types[q.type]||q.type)+'</div>';
+  h+='<div style="font-size:16px;margin:8px 0">'+(idx+1)+'. '+esc(q.text||'')+'</div>';
+  if(q.type==='judge'){
+    h+='<div class="option" id="opt-true" onclick="selectJudge(\'true\')">\u2714 正确</div>';
+    h+='<div class="option" id="opt-false" onclick="selectJudge(\'false\')">\u2716 错误</div>';
+  } else if(q.options){
+    q.options.forEach(function(opt,i){
+      h+='<div class="option" id="opt-'+i+'" onclick="selectSingle('+i+')">'+String.fromCharCode(65+i)+'. '+esc(opt)+'</div>';
+    });
+  }
+  h+='</div>';
+  h+='<button class="btn btn-primary" id="practice-submit" onclick="submitPracticeAnswer()" style="width:100%">提交</button>';
+  h+='<div id="answer-result" style="margin-top:8px"></div>';
+  cont.innerHTML=h;
+  selectedOpt=null;
+}
+var selectedOpt=null;
+function selectSingle(i){
+  selectedOpt=i;
+  document.querySelectorAll('.option').forEach(function(e){e.className='option';});
+  var o=document.getElementById('opt-'+i); if(o) o.className='option selected';
+}
+function selectJudge(v){
+  selectedOpt=v;
+  document.querySelectorAll('.option').forEach(function(e){e.className='option';});
+  document.getElementById('opt-'+v).className='option selected';
+}
+function submitPracticeAnswer(){
+  if(state.idx>=state.queue.length)return;
+  var q=state.queue[state.idx];
+  var submitBtn=document.getElementById('practice-submit');
+  var resultDiv=document.getElementById('answer-result');
+  if(!submitBtn)return;
+  submitBtn.style.display='none';
+  var correct=q.answer||'';
+  var isCorrect=false, userAnswer='';
+  var opts=document.querySelectorAll('.option');
+  opts.forEach(function(e){e.className='option';});
+  if(q.type==='judge'){
+    userAnswer=selectedOpt;
+    isCorrect=(selectedOpt===correct);
+    var co=document.getElementById('opt-'+correct); if(co) co.className='option correct';
+    if(!isCorrect&&document.getElementById('opt-'+userAnswer)) document.getElementById('opt-'+userAnswer).className='option wrong';
+  } else if(q.options){
+    userAnswer=selectedOpt!==null?q.options[selectedOpt]:'';
+    isCorrect=(userAnswer===correct||correct===String.fromCharCode(65+(selectedOpt||0)));
+    var ci=-1;
+    if(correct.length===1&&correct>='A'&&correct<='Z') ci=correct.charCodeAt(0)-65;
+    else ci=q.options.indexOf(correct);
+    var co=document.getElementById('opt-'+ci); if(co) co.className='option correct';
+    if(selectedOpt!==null&&selectedOpt!==ci&&document.getElementById('opt-'+selectedOpt)){
+      document.getElementById('opt-'+selectedOpt).className='option wrong';
+    }
+  }
+  q.done=true; q.correct=isCorrect;
+  state.queue[state.idx]=q;
+  var rh='<div style="font-size:16px;margin:6px 0;padding:10px;border-radius:6px;background:'+(isCorrect?'#1a3a2e':'#3a1a2e')+';">'+(isCorrect?'\u2705 回答正确！':'\u274C 回答错误')+'</div>';
+  if(!isCorrect&&q.explanation) rh+='<div style="font-size:14px;color:#aaa;padding:8px 0">\u{1F4D6} '+esc(q.explanation)+'</div>';
+  if(isCorrect&&q.explanation) rh+='<div style="font-size:14px;color:#aaa;padding:8px 0">\u{1F4D6} '+esc(q.explanation)+'</div>';
+  rh+='<button class="btn btn-green" onclick="nextPractice()" style="width:100%;margin-top:6px">下一题</button>';
+  resultDiv.innerHTML=rh;
+}
+function nextPractice(){
+  state.idx++;
+  if(state.idx>=state.queue.length) showPracticeComplete();
+  else showPracticeQuestion();
+}
+function showPracticeComplete(){
+  showPage('home');
+  var cont=el('home-content');
+  var total=state.queue.length;
+  var correct=state.queue.filter(function(q){return q.correct;}).length;
+  var acc=total>0?Math.round(correct/total*100):0;
+  var emoji=acc>=80?'🎉':'👍'; var title=acc>=80?'太棒了！':(acc>=60?'还不错！':'继续加油！');
+  cont.innerHTML='<div class="text-center" style="padding:30px 0"><div style="font-size:56px">'+emoji+'</div><div style="font-size:22px;font-weight:bold">'+title+'</div><div style="font-size:14px;color:#888;margin:8px 0">完成 '+total+' 题，正确率 '+acc+'% ('+correct+'/'+total+')</div>'+
+    '<div class="flex" style="justify-content:center;margin-top:12px"><button class="btn btn-primary" onclick="showBankSelect()">\u{1F504} 再刷一遍</button><button class="btn" style="background:#0f3460;color:#aaa;margin-left:8px" onclick="loadHome()">\u{1F3E0} 返回首页</button></div></div>';
+}
+function exitPractice(){showPage('home');loadHome();}
+
+function showWrongNotes(){
+  showPage('wrong');
+  var cont=el('wrong-content');
+  cont.innerHTML='<div class="card text-center" style="padding:20px">加载中...</div>';
+  api('/load_wrong_notes',{phone:state.phone}).then(function(res){
+    cont.innerHTML='';
+    var notes=res.success?res.wrong_notes:[];
+    if(notes.length===0){
+      cont.innerHTML='<div class="card text-center" style="padding:40px"><div style="font-size:40px">\u{1F389}</div><div style="font-size:16px;margin:8px 0">暂无错题记录！</div></div>';
+      return;
+    }
+    cont.innerHTML='<div class="text-muted" style="font-size:13px;margin-bottom:6px">共 '+notes.length+' 道错题</div>';
+    notes.forEach(function(q,i){
+      var types={single:'单选',multiple:'多选',judge:'判断',fill:'填空',essay:'问答'};
+      var card=document.createElement('div'); card.className='card';
+      card.innerHTML='<div class="badge">'+(types[q.type]||q.type)+'</div><div style="font-size:15px;margin:6px 0">'+(i+1)+'. '+esc(q.text||'')+'</div>'+
+        '<div style="font-size:13px;color:#aaa">答案: '+esc(q.answer||'')+'</div>';
+      if(q.explanation) card.innerHTML+='<div style="font-size:12px;color:#888;margin-top:4px">\u{1F4D6} '+esc(q.explanation)+'</div>';
+      cont.appendChild(card);
+    });
+  });
+}
+function showStats(){
+  showPage('stats');
+  el('stats-content').innerHTML='<div class="card text-center" style="padding:20px">加载中...</div>';
+  api('/get_student_classes',{student:state.phone}).then(function(res){
+    var cont=el('stats-content');
+    if(!res.success||!res.classes) {cont.innerHTML='<div class="card text-center">暂无数据</div>';return;}
+    var html='';
+    res.classes.forEach(function(cls){
+      html+='<div class="card"><div class="bank-name">\u{1F3EB} '+esc(cls.name)+'</div>';
+      cls.banks.forEach(function(b){
+        html+='<div class="bank-item">\u{1F4D6} '+esc(b.name)+' - '+b.count+'题</div>';
+      });
+      html+='</div>';
+    });
+    cont.innerHTML=html||'<div class="card text-center">暂无数据</div>';
+  });
+}
+</script>
+</body>
+</html>

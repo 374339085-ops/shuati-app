@@ -1,0 +1,58 @@
+name: Build APK
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Make gradlew executable
+        run: chmod +x gradlew
+        working-directory: ShuatiApp
+
+      - name: Build APK
+        run: |
+          cd ShuatiApp
+          sed -i 's|http://YOUR_SERVER_IP:5000|http://192.168.1.4:5000|g' app/src/main/assets/www/index.html
+          ./gradlew assembleRelease
+
+      - name: Sign APK
+        run: |
+          cd ShuatiApp
+          echo "storePassword=android" > keystore.properties
+          echo "keyPassword=android" >> keystore.properties
+          echo "keyAlias=key0" >> keystore.properties
+          echo "storeFile=shuati.keystore" >> keystore.properties
+          keytool -genkey -v -keystore shuati.keystore -alias key0 -keyalg RSA \
+            -keysize 2048 -validity 10000 \
+            -storepass android -keypass android \
+            -dname "CN=BaoZi, OU=Dev, O=BaoZi, L=Beijing, ST=Beijing, C=86"
+          $ANDROID_HOME/build-tools/*/apksigner sign \
+            --ks shuati.keystore --ks-key-alias key0 \
+            --ks-pass pass:android --key-pass pass:android \
+            app/build/outputs/apk/release/app-release-unsigned.apk
+
+      - name: Rename APK
+        run: |
+          mv ShuatiApp/app/build/outputs/apk/release/app-release-unsigned.apk \
+             ShuatiApp/app/build/outputs/apk/release/刷题软件.apk
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: 刷题软件-APK
+          path: ShuatiApp/app/build/outputs/apk/release/刷题软件.apk

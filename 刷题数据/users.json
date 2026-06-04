@@ -1,0 +1,33 @@
+{
+  "wrongNotes": [
+    {
+      "id": 879134043249,
+      "text": "煤矿企业自用工之日起超过一个月不满一年未与劳动者订立书面劳动合同的，应当向从业人员每月支付（   ）倍的工资。",
+      "wrongAnswer": "三",
+      "correctAnswer": "二",
+      "explanation": "",
+      "category": "单选题"
+    },
+    {
+      "id": 512549561189,
+      "text": "为了防止事故，应由（   ）参与预防工作和担当责任。",
+      "wrongAnswer": "用人单位",
+      "correctAnswer": "用人单位和工人本身两方面",
+      "explanation": "",
+      "category": "单选题"
+    }
+  ],
+  "settings": {
+    "shuffle": false,
+    "showExp": true,
+    "autoNext": true
+  },
+  "17795978022": {
+    "wrongNotes": [],
+    "settings": {
+      "shuffle": false,
+      "showExp": true,
+      "autoNext": false
+    }
+  }
+}

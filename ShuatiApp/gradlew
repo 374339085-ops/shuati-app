@@ -1,0 +1,3 @@
+#!/bin/sh
+command -v java >/dev/null 2>&1 || { echo "Java not found"; exit 1; }
+exec java -classpath "$(dirname "$0")/gradle/wrapper/gradle-wrapper.jar" org.gradle.wrapper.GradleWrapperMain "$@"
