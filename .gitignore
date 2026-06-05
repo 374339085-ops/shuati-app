@@ -11,3 +11,5 @@ app/build/
 .idea/
 *.iml
 .DS_Store
+
+# trigger rebuild
