@@ -313,6 +313,35 @@ def get_local_ip():
         s.close()
     return ip
 
+# ============ PWA 静态文件 ============
+import mimetypes
+mimetypes.add_type('application/manifest+json', '.json')
+
+PWA_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "server_templates")
+
+@app.route('/manifest.json')
+def serve_manifest():
+    return open(os.path.join(PWA_DIR, 'manifest.json'), encoding='utf-8').read(), 200, {'Content-Type': 'application/manifest+json'}
+
+@app.route('/sw.js')
+def serve_sw():
+    return open(os.path.join(PWA_DIR, 'sw.js'), encoding='utf-8').read(), 200, {'Content-Type': 'application/javascript; charset=utf-8'}
+
+@app.route('/icon-192.png')
+def serve_icon192():
+    from flask import send_file
+    return send_file(os.path.join(PWA_DIR, 'icon-192.png'), mimetype='image/png')
+
+@app.route('/icon-512.png')
+def serve_icon512():
+    from flask import send_file
+    return send_file(os.path.join(PWA_DIR, 'icon-512.png'), mimetype='image/png')
+
+@app.route('/favicon.ico')
+def serve_favicon():
+    from flask import send_file
+    return send_file(os.path.join(PWA_DIR, 'icon-192.png'), mimetype='image/x-icon')
+
 if __name__ == "__main__":
     local_ip = get_local_ip()
     print(f"\n{'='*50}")
