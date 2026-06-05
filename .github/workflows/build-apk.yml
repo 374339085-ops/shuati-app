@@ -2,7 +2,7 @@ name: Build APK
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, master ]
   workflow_dispatch:
 
 jobs:
@@ -20,6 +20,9 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
+      - name: Accept licenses
+        run: yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses || true
+
       - name: Make gradlew executable
         run: chmod +x gradlew
         working-directory: ShuatiApp
@@ -27,16 +30,11 @@ jobs:
       - name: Build APK
         run: |
           cd ShuatiApp
-          sed -i 's|http://YOUR_SERVER_IP:5000|http://192.168.1.4:5000|g' app/src/main/assets/www/index.html
-          ./gradlew assembleRelease
+          ./gradlew assembleRelease --no-daemon
 
       - name: Sign APK
         run: |
           cd ShuatiApp
-          echo "storePassword=android" > keystore.properties
-          echo "keyPassword=android" >> keystore.properties
-          echo "keyAlias=key0" >> keystore.properties
-          echo "storeFile=shuati.keystore" >> keystore.properties
           keytool -genkey -v -keystore shuati.keystore -alias key0 -keyalg RSA \
             -keysize 2048 -validity 10000 \
             -storepass android -keypass android \
