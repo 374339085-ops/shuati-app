@@ -23,23 +23,23 @@ jobs:
       - name: Accept licenses
         run: yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses || true
 
-      - name: Check gradle files
-        run: |
-          ls -la ShuatiApp/
-          cat ShuatiApp/gradle/wrapper/gradle-wrapper.properties
-          cat ShuatiApp/build.gradle
-          cat ShuatiApp/app/build.gradle
-
-      - name: Fix gradlew
-        run: |
-          chmod +x gradlew
-          # 确保 gradle wrapper 可下载（使用镜像加速）
-          cd ShuatiApp
-          sed -i 's|services.gradle.org|mirrors.cloud.tencent.com|g' gradle/wrapper/gradle-wrapper.properties || true
+      - name: Make gradlew executable
+        run: chmod +x gradlew
         working-directory: ShuatiApp
+
+      - name: Pre-download Gradle
+        run: |
+          cd ShuatiApp
+          ./gradlew --version --no-daemon 2>&1 | tail -20
 
       - name: Build APK
         run: |
           cd ShuatiApp
-          export GRADLE_OPTS="-Dorg.gradle.daemon=false -Dorg.gradle.jvmargs=-Xmx2g"
-          ./gradlew assembleDebug --no-daemon --stacktrace --info 2>&1 | tail -100
+          ./gradlew assembleDebug --no-daemon 2>&1 | tail -50
+
+      - name: Upload APK
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: 刷题软件-APK
+          path: ShuatiApp/app/build/outputs/apk/debug/*.apk
