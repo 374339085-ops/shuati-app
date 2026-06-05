@@ -23,6 +23,15 @@ jobs:
       - name: Accept licenses
         run: yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses || true
 
+      - name: Cache Gradle
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: gradle-${{ hashFiles('ShuatiApp/**/*.gradle*', 'ShuatiApp/gradle/wrapper/gradle-wrapper.properties') }}
+          restore-keys: gradle-
+
       - name: Make gradlew executable
         run: chmod +x gradlew
         working-directory: ShuatiApp
@@ -30,14 +39,12 @@ jobs:
       - name: Build APK
         run: |
           cd ShuatiApp
-          ./gradlew assembleDebug --no-daemon
-
-      - name: Find APK
-        run: |
-          find ShuatiApp -name "*.apk" -type f
+          ./gradlew assembleDebug --no-daemon --no-build-cache
+        env:
+          GRADLE_OPTS: "-Dorg.gradle.daemon=false -Dorg.gradle.jvmargs=-Xmx2g"
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: 刷题软件APK
-          path: "**/*.apk"
+          path: ShuatiApp/app/build/outputs/apk/debug/*.apk
