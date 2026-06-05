@@ -28,18 +28,18 @@ jobs:
           ls -la ShuatiApp/
           cat ShuatiApp/gradle/wrapper/gradle-wrapper.properties
           cat ShuatiApp/build.gradle
+          cat ShuatiApp/app/build.gradle
 
-      - name: Make gradlew executable
-        run: chmod +x gradlew
+      - name: Fix gradlew
+        run: |
+          chmod +x gradlew
+          # 确保 gradle wrapper 可下载（使用镜像加速）
+          cd ShuatiApp
+          sed -i 's|services.gradle.org|mirrors.cloud.tencent.com|g' gradle/wrapper/gradle-wrapper.properties || true
         working-directory: ShuatiApp
 
-      - name: Build debug APK (for testing)
+      - name: Build APK
         run: |
           cd ShuatiApp
-          ./gradlew assembleDebug --no-daemon --stacktrace
-
-      - name: Upload debug APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: 刷题软件-APK
-          path: ShuatiApp/app/build/outputs/apk/debug/*.apk
+          export GRADLE_OPTS="-Dorg.gradle.daemon=false -Dorg.gradle.jvmargs=-Xmx2g"
+          ./gradlew assembleDebug --no-daemon --stacktrace --info 2>&1 | tail -100
