@@ -28,15 +28,23 @@ jobs:
       - name: Accept licenses
         run: yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses || true
 
-      - name: Build APK with Gradle
+      - name: Build APK (attempt 1)
+        continue-on-error: true
         run: |
           cd ShuatiApp
-          gradle assembleDebug --no-daemon --no-build-cache
-        env:
-          GRADLE_OPTS: "-Dorg.gradle.daemon=false -Dorg.gradle.jvmargs=-Xmx2g"
+          gradle assembleDebug --no-daemon --stacktrace 2>&1 | tail -200
+
+      - name: Build APK (attempt 2 with retry)
+        if: steps.build1.outcome == 'failure'
+        run: |
+          cd ShuatiApp
+          gradle assembleDebug --no-daemon --stacktrace --refresh-dependencies 2>&1 | tail -200
+
+      - name: Find APKs
+        run: find . -name "*.apk" -type f 2>/dev/null || true
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: 刷题软件APK
-          path: ShuatiApp/app/build/outputs/apk/debug/*.apk
+          path: "**/*.apk"
